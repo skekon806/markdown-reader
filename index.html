@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Markdown 阅读器 · GitHub 仓库阅读器</title>
+    <title>Markdown 阅读器 · 移动端折叠目录</title>
     
     <!-- 引入 Highlight.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
@@ -17,7 +17,6 @@
             --bg-color: #f0f2f5;
             --text-color: #000000;
             --border-color: #e1e4e8;
-            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -73,7 +72,7 @@
 
         input[type="file"] { display: none; }
 
-        /* 移动端菜单按钮 */
+        /* 移动端菜单按钮 (汉堡) */
         .menu-toggle {
             display: none;
             background: transparent;
@@ -84,10 +83,13 @@
             color: var(--primary-color);
             line-height: 1;
             border-radius: 8px;
+            transition: background 0.2s;
         }
-        .menu-toggle:hover { background: #f0f0f0; }
+        .menu-toggle:hover {
+            background: #f0f0f0;
+        }
 
-        /* 左侧边栏 - 文件列表 */
+        /* 左侧边栏 (TOC) - 桌面端固定显示 */
         #toc-sidebar {
             width: var(--sidebar-width);
             background: white;
@@ -99,119 +101,54 @@
             bottom: 0;
             left: 0;
             z-index: 900;
+            padding: 20px;
             overflow-y: auto;
             transition: transform 0.3s ease;
         }
 
-        #file-list-header {
-            padding: 20px 20px 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        #file-list-header h3 {
+        #toc-sidebar h3 {
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: #666;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
         }
 
-        #file-search {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 13px;
-            outline: none;
-        }
-
-        #file-search:focus {
-            border-color: var(--accent-color);
-        }
-
-        #file-list {
-            flex: 1;
-            list-style: none;
-            padding: 12px;
-            overflow-y: auto;
-        }
-
-        .file-item {
-            margin-bottom: 8px;
-        }
-
-        .file-card {
-            display: block;
-            padding: 12px;
-            background: #f8f9fa;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+        #toc-list { list-style: none; }
+        #toc-list li { margin-bottom: 8px; }
+        
+        #toc-list a {
             text-decoration: none;
+            color: #555;
+            font-size: 0.9rem;
+            display: block;
+            padding: 6px 10px;
+            border-radius: 4px;
             transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .file-card:hover {
-            background: #e8f4ff;
-            border-color: var(--accent-color);
-            transform: translateX(2px);
-        }
-
-        .file-card.active {
-            background: #e6f7ff;
-            border-color: var(--accent-color);
-            border-left: 3px solid var(--accent-color);
-        }
-
-        .file-name {
-            font-weight: 600;
-            color: var(--primary-color);
-            font-size: 14px;
-            margin-bottom: 4px;
-            word-break: break-word;
-        }
-
-        .file-preview {
-            font-size: 12px;
-            color: #666;
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
+            border-left: 3px solid transparent;
         }
 
-        .folder-item {
-            margin-top: 12px;
+        #toc-list a:hover { 
+            background-color: #f0f7ff; 
+            color: var(--accent-color); 
+            border-left-color: var(--accent-color);
+        }
+        #toc-list a.active { 
+            background-color: #e6f7ff; 
+            color: var(--accent-color); 
+            font-weight: 600;
+            border-left-color: var(--accent-color);
         }
 
-        .folder-header {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            background: #f0f0f0;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 13px;
-        }
-
-        .folder-header:hover {
-            background: #e8e8e8;
-        }
-
-        .folder-icon {
-            margin-right: 8px;
-            font-size: 14px;
-        }
-
-        .folder-content {
-            padding-left: 20px;
-            margin-top: 8px;
-            display: block;
-        }
-
-        .folder-content.collapsed {
-            display: none;
-        }
+        /* 缩进样式 */
+        #toc-list .level-h2 { margin-left: 10px; font-size: 0.88rem; }
+        #toc-list .level-h3 { margin-left: 20px; font-size: 0.85rem; }
+        #toc-list .level-h4 { margin-left: 30px; font-size: 0.82rem; }
 
         /* 右侧主内容区 */
         #main-wrapper {
@@ -223,6 +160,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            justify-content: flex-start;
             background: var(--bg-color);
             transition: margin-left 0.3s ease;
         }
@@ -264,9 +202,11 @@
         }
         #main-wrapper.read-only-mode #preview {
             height: 100%;
+            border-top: none;
         }
 
-        /* Markdown 内容样式 */
+        /* ========= 修复列表文本溢出问题 ========= */
+        /* Markdown 内容样式 - 重点修复列表换行 */
         #preview {
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -278,6 +218,8 @@
             margin-bottom: 16px; 
             color: #000000; 
             font-weight: 600;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         #preview h1 { font-size: 1.8em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
         #preview h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
@@ -285,8 +227,11 @@
             margin-bottom: 16px; 
             line-height: 1.7; 
             color: #000000;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         
+        /* 修复无序列表和有序列表的换行问题 */
         #preview ul, #preview ol {
             margin: 0 0 16px 0;
             padding-left: 28px;
@@ -295,9 +240,25 @@
         #preview li {
             margin-bottom: 6px;
             line-height: 1.7;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
             color: #000000;
         }
-
+        
+        /* 确保列表项内的文本正常换行 */
+        #preview li p {
+            margin-bottom: 0;
+        }
+        
+        /* 嵌套列表样式 */
+        #preview ul ul, #preview ol ul, #preview ul ol, #preview ol ol {
+            margin-bottom: 0;
+            margin-top: 6px;
+        }
+        
+        /* 表格样式优化 */
         #preview table {
             border-collapse: collapse;
             width: 100%;
@@ -305,32 +266,74 @@
             font-size: 14px;
             display: block;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         #preview table th, #preview table td {
             border: 1px solid var(--border-color);
             padding: 8px 12px;
             text-align: left;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            min-width: 80px;
             color: #000000;
         }
-        
+        #preview table th { 
+            background-color: #f8f9fa; 
+            font-weight: 600; 
+            color: #000000;
+        }
+        #preview table tr:nth-child(even) { background-color: #fcfcfc; }
+
+        /* 代码块样式 */
         #preview code { 
             background: #f0f0f0; 
             padding: 2px 5px; 
             border-radius: 4px; 
+            font-family: monospace; 
             color: #d63384; 
+            font-size: 0.9em;
+            word-wrap: break-word;
+            white-space: normal;
         }
         #preview pre { 
             background: #f6f8fa; 
             padding: 16px; 
             border-radius: 6px; 
             overflow-x: auto; 
+            margin-bottom: 20px; 
+            border: 1px solid #eee;
         }
-        
+        #preview pre code { 
+            background: transparent; 
+            color: #000000; 
+            padding: 0; 
+            font-size: 13px;
+            white-space: pre;
+            word-wrap: normal;
+        }
+
         #preview blockquote { 
             border-left: 4px solid var(--accent-color); 
-            padding: 10px 10px 10px 20px;
+            padding-left: 16px; 
+            color: #000000; 
+            margin: 20px 0; 
             background: #f9f9f9;
-            color: #000000;
+            padding: 10px 10px 10px 20px;
+            border-radius: 0 4px 4px 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        #preview img { 
+            max-width: 100%; 
+            border-radius: 4px;
+            height: auto;
+        }
+        
+        /* 强制所有文本内容换行 */
+        #preview * {
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         /* 移动端遮罩层 */
@@ -343,19 +346,15 @@
             background: rgba(0,0,0,0.5);
             z-index: 950;
             display: none;
+            opacity: 0;
+            transition: opacity 0.25s ease;
         }
         .sidebar-overlay.active {
             display: block;
+            opacity: 1;
         }
 
-        /* 加载状态 */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        /* 响应式 */
+        /* ========= 响应式布局：移动端竖屏 ========= */
         @media (max-width: 768px) {
             .menu-toggle {
                 display: flex;
@@ -363,11 +362,13 @@
                 justify-content: center;
             }
             
+            /* 侧边栏默认隐藏，滑出式菜单 */
             #toc-sidebar {
                 transform: translateX(-100%);
                 width: 280px;
                 z-index: 1001;
                 box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+                transition: transform 0.25s ease;
             }
             #toc-sidebar.open {
                 transform: translateX(0);
@@ -377,18 +378,35 @@
                 margin-left: 0 !important;
             }
             
+            /* 工具栏简化 */
+            #toolbar {
+                padding: 0 12px;
+                gap: 8px;
+            }
             .btn {
                 padding: 6px 12px;
                 font-size: 13px;
             }
+            
+            /* 移动端预览区域减小内边距，给文本更多空间 */
+            #preview {
+                padding: 20px 16px;
+            }
+            
+            /* 移动端列表左边距适当减小 */
+            #preview ul, #preview ol {
+                padding-left: 20px;
+            }
         }
 
+        /* 横屏模式（宽度 > 768px 时使用桌面布局） */
         @media (min-width: 769px) {
             .menu-toggle {
                 display: none !important;
             }
             #toc-sidebar {
                 transform: none !important;
+                position: fixed;
             }
             .sidebar-overlay {
                 display: none !important;
@@ -397,348 +415,230 @@
                 margin-left: var(--sidebar-width);
             }
         }
+
+        /* 小高度设备优化 */
+        @media (max-height: 600px) {
+            #editor, #preview {
+                padding: 16px;
+            }
+            #toc-sidebar {
+                padding: 12px;
+            }
+        }
+        
+        /* 超小屏幕额外优化 (宽度小于400px) */
+        @media (max-width: 480px) {
+            #preview {
+                padding: 16px 12px;
+            }
+            #preview ul, #preview ol {
+                padding-left: 18px;
+            }
+            #preview li {
+                font-size: 14px;
+            }
+        }
+        
+        /* 文件名显示样式 */
+        #file-name-display {
+            color: #666;
+        }
     </style>
 </head>
 <body>
 
+    <!-- 顶部工具栏 -->
     <header id="toolbar">
-        <button class="menu-toggle" id="menuToggleBtn">☰</button>
+        <!-- 移动端汉堡菜单按钮 -->
+        <button class="menu-toggle" id="menuToggleBtn" aria-label="目录菜单">☰</button>
         
         <label class="btn btn-primary">
-            📂 上传本地
-            <input type="file" id="file-input" accept=".md,.markdown">
+            📂 导入 .md
+            <input type="file" id="file-input" accept=".md,.markdown,.txt">
         </label>
         
-        <button class="btn" id="refresh-btn">🔄 刷新列表</button>
         <button class="btn" id="toggle-edit-btn" style="display:none;">✏️ 编辑模式</button>
-        <span style="margin-left: auto; color: #666; font-size: 0.8rem;" id="current-file-name">未选择文件</span>
+        <span style="margin-left: auto; color: #666; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="file-name-display">未选择文件</span>
     </header>
 
+    <!-- 左侧目录 (移动端滑动菜单) -->
     <aside id="toc-sidebar">
-        <div id="file-list-header">
-            <h3>📁 仓库文件</h3>
-            <input type="text" id="file-search" placeholder="搜索文件...">
-        </div>
-        <div id="file-list">
-            <div class="loading">加载文件中...</div>
-        </div>
+        <h3>📑 目录导航</h3>
+        <ul id="toc-list">
+            <li style="color: #999; font-style: italic; font-size: 0.9rem;">暂无标题...</li>
+        </ul>
     </aside>
     
+    <!-- 移动端遮罩层 -->
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
+    <!-- 右侧主内容 -->
     <div id="main-wrapper">
-        <textarea id="editor" placeholder="在此输入 Markdown..."></textarea>
+        <textarea id="editor" placeholder="在此输入 Markdown，或点击上方按钮导入文件..."></textarea>
         <div id="preview"></div>
     </div>
 
+    <!-- 脚本库 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
     <script>
         (function(){
-            // DOM 元素
+            // ---------- DOM 元素 ----------
             const editor = document.getElementById('editor');
             const preview = document.getElementById('preview');
-            const fileList = document.getElementById('file-list');
-            const fileSearch = document.getElementById('file-search');
-            const refreshBtn = document.getElementById('refresh-btn');
+            const tocList = document.getElementById('toc-list');
             const fileInput = document.getElementById('file-input');
-            const currentFileName = document.getElementById('current-file-name');
+            const fileNameDisplay = document.getElementById('file-name-display');
             const mainWrapper = document.getElementById('main-wrapper');
             const toggleEditBtn = document.getElementById('toggle-edit-btn');
             const menuToggleBtn = document.getElementById('menuToggleBtn');
             const sidebar = document.getElementById('toc-sidebar');
             const overlay = document.getElementById('sidebarOverlay');
+            
+            // 默认示例内容（包含列表测试）
+            const defaultContent = `# 欢迎使用 Markdown 阅读器
 
-            let currentFile = null;
-            let allFiles = [];
+## 📱 移动端优化
+- 左侧目录折叠汉堡菜单，节省屏幕空间
+- 横屏自动切换为桌面布局，侧边栏常驻
+- 完美适配手机/平板/电脑
+- 这是一段很长的文本用来测试在移动端窄屏幕下列表项是否能够正常换行而不会超出容器宽度，确保用户体验良好
 
-            // 获取 GitHub 仓库的 Markdown 文件列表
-            async function fetchMarkdownFiles() {
-                // 获取当前页面的路径，推断 GitHub 仓库路径
-                const currentPath = window.location.pathname;
-                let repoPath = '';
-                
-                // 如果是 GitHub Pages 子目录，获取仓库根路径
-                if (currentPath.includes('/')) {
-                    const parts = currentPath.split('/');
-                    // 通常格式: /username/repository/
-                    if (parts.length >= 3) {
-                        repoPath = `/${parts[1]}/${parts[2]}`;
-                    }
-                }
-                
-                // 获取当前仓库的文件列表（通过 GitHub API）
-                const repoName = window.location.hostname.split('.')[0];
-                const repoFullName = `${repoName}${repoPath}`;
-                
-                try {
-                    // 尝试通过 GitHub API 获取文件列表
-                    const apiUrl = `https://api.github.com/repos${repoPath}/git/trees/main?recursive=1`;
-                    
-                    const response = await fetch(apiUrl);
-                    if (response.ok) {
-                        const data = await response.json();
-                        const mdFiles = data.tree.filter(item => 
-                            item.path.endsWith('.md') || item.path.endsWith('.markdown')
-                        );
-                        
-                        return mdFiles.map(file => ({
-                            name: file.path.split('/').pop(),
-                            path: file.path,
-                            url: file.url,
-                            downloadUrl: `https://raw.githubusercontent.com${repoPath}/main/${file.path}`
-                        }));
-                    }
-                } catch (error) {
-                    console.log('API 获取失败，使用本地扫描模式');
-                }
-                
-                // 如果 API 失败，尝试扫描当前目录
-                return await scanLocalDirectory();
-            }
-            
-            // 扫描当前目录下的 .md 文件（需要手动配置或使用文件列表）
-            async function scanLocalDirectory() {
-                // 返回一个示例文件列表，用户需要手动配置
-                return [];
-            }
-            
-            // 渲染文件列表
-            function renderFileList(files, searchTerm = '') {
-                const filteredFiles = files.filter(file => 
-                    file.name.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-                
-                if (filteredFiles.length === 0) {
-                    fileList.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">暂无 Markdown 文件</div>';
-                    return;
-                }
-                
-                fileList.innerHTML = '';
-                
-                // 按文件夹分组
-                const filesByFolder = {};
-                filteredFiles.forEach(file => {
-                    const pathParts = file.path.split('/');
-                    const folder = pathParts.length > 1 ? pathParts.slice(0, -1).join('/') : '根目录';
-                    if (!filesByFolder[folder]) {
-                        filesByFolder[folder] = [];
-                    }
-                    filesByFolder[folder].push(file);
-                });
-                
-                // 渲染文件夹和文件
-                Object.keys(filesByFolder).sort().forEach(folder => {
-                    const folderFiles = filesByFolder[folder];
-                    
-                    if (folder === '根目录') {
-                        folderFiles.forEach(file => {
-                            renderFileCard(file);
-                        });
-                    } else {
-                        const folderId = 'folder-' + folder.replace(/[^a-zA-Z0-9]/g, '-');
-                        const folderDiv = document.createElement('div');
-                        folderDiv.className = 'folder-item';
-                        folderDiv.innerHTML = `
-                            <div class="folder-header" data-folder="${folderId}">
-                                <span class="folder-icon">📁</span>
-                                <span>${folder}</span>
-                                <span style="margin-left: auto; font-size: 12px; color: #888;">${folderFiles.length}</span>
-                            </div>
-                            <div id="${folderId}" class="folder-content">
-                                ${folderFiles.map(file => renderFileCardHTML(file)).join('')}
-                            </div>
-                        `;
-                        fileList.appendChild(folderDiv);
-                        
-                        // 添加折叠功能
-                        const header = folderDiv.querySelector('.folder-header');
-                        const content = folderDiv.querySelector('.folder-content');
-                        header.addEventListener('click', () => {
-                            content.classList.toggle('collapsed');
-                        });
-                    }
-                });
-                
-                // 绑定文件点击事件
-                document.querySelectorAll('.file-card').forEach(card => {
-                    card.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const path = card.dataset.path;
-                        const file = allFiles.find(f => f.path === path);
-                        if (file) {
-                            loadMarkdownFile(file);
-                        }
-                    });
-                });
-            }
-            
-            function renderFileCardHTML(file) {
-                return `
-                    <div class="file-item">
-                        <div class="file-card" data-path="${file.path}">
-                            <div class="file-name">📄 ${file.name}</div>
-                            <div class="file-preview">${file.path}</div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            function renderFileCard(file) {
-                const item = document.createElement('div');
-                item.className = 'file-item';
-                item.innerHTML = `
-                    <div class="file-card" data-path="${file.path}">
-                        <div class="file-name">📄 ${file.name}</div>
-                        <div class="file-preview">${file.path}</div>
-                    </div>
-                `;
-                fileList.appendChild(item);
-            }
-            
-            // 加载 Markdown 文件内容
-            async function loadMarkdownFile(file) {
-                currentFileName.textContent = file.name;
-                currentFile = file;
-                
-                // 高亮当前选中的文件
-                document.querySelectorAll('.file-card').forEach(card => {
-                    card.classList.remove('active');
-                    if (card.dataset.path === file.path) {
-                        card.classList.add('active');
-                    }
-                });
-                
-                try {
-                    let content;
-                    
-                    // 如果是 GitHub 上的文件，通过 raw URL 获取
-                    if (file.downloadUrl) {
-                        const response = await fetch(file.downloadUrl);
-                        content = await response.text();
-                    } else {
-                        // 尝试通过相对路径获取
-                        const response = await fetch(file.path);
-                        content = await response.text();
-                    }
-                    
-                    editor.value = content;
-                    renderMarkdown();
-                    
-                    // 切换到只读模式
-                    mainWrapper.classList.add('read-only-mode');
-                    toggleEditBtn.style.display = 'inline-block';
-                    toggleEditBtn.textContent = '✏️ 编辑模式';
-                    
-                    // 移动端关闭侧边栏
-                    if (window.innerWidth <= 768) {
-                        closeSidebar();
-                    }
-                } catch (error) {
-                    console.error('加载文件失败:', error);
-                    editor.value = `# 加载失败\n\n无法加载文件: ${file.name}\n\n错误信息: ${error.message}`;
-                    renderMarkdown();
-                }
-            }
-            
-            // 配置 Marked
+## ✨ 核心特性
+| 功能 | 说明 |
+|------|------|
+| 实时编辑 | 左侧编辑右侧预览，支持实时渲染 |
+| 目录导航 | 自动提取标题，点击平滑滚动 |
+| 代码高亮 | 支持主流编程语言语法高亮 |
+| 导入文件 | 支持 .md 文件导入编辑 |
+
+## 🧩 有序列表测试
+1. 第一项内容，这是一段很长的文本用来测试有序列表在窄屏幕下的换行行为
+2. 第二项内容，同样需要测试换行效果，确保不会出现横向滚动条
+3. 第三项，包含中英文混合内容 Mixed content for testing line wrapping
+
+## 🧩 代码示例
+
+\`\`\`javascript
+function greet() {
+    console.log("Hello, 移动端阅读器!");
+    console.log("这是一个很长的代码行用来测试代码块的横向滚动，不会破坏布局");
+}
+greet();
+\`\`\`
+
+## 📖 嵌套列表测试
+- 一级列表项
+  - 二级嵌套列表，这是一段很长的文本用于测试嵌套列表的换行效果
+  - 另一个二级项
+    - 三级嵌套，更深层级的列表也需要正确处理文本换行
+- 回到一级列表，继续测试长文本换行功能
+
+> 这是一段引用文本，同样需要测试在窄屏幕下能否正常换行而不会超出边界。引用块应该有良好的阅读体验。
+
+享受沉浸式阅读与写作体验！
+`;
+
+            // 配置 marked 高亮
             marked.setOptions({
                 breaks: true,
                 gfm: true,
                 highlight: function(code, lang) {
                     const language = hljs.getLanguage(lang) ? lang : 'plaintext';
                     return hljs.highlight(code, { language }).value;
-                }
+                },
+                langPrefix: 'hljs language-'
             });
             
+            // 渲染 Markdown 并生成目录
             function renderMarkdown() {
                 const rawMarkdown = editor.value;
                 let parsedHtml = marked.parse(rawMarkdown);
                 preview.innerHTML = parsedHtml;
+                // 高亮代码块
                 preview.querySelectorAll('pre code').forEach(block => {
                     hljs.highlightElement(block);
                 });
+                generateTOC();
             }
             
-            // 刷新文件列表（手动配置）
-            async function refreshFileList() {
-                fileList.innerHTML = '<div class="loading">加载文件中...</div>';
-                
-                // 提示用户配置文件列表
-                const userFiles = prompt(
-                    '请输入您的 Markdown 文件路径列表（每行一个，相对路径）:\n\n' +
-                    '例如:\n' +
-                    'README.md\n' +
-                    'docs/guide.md\n' +
-                    'posts/hello.md\n\n' +
-                    '或者留空使用默认示例'
-                );
-                
-                if (userFiles && userFiles.trim()) {
-                    const paths = userFiles.split('\n').filter(p => p.trim());
-                    allFiles = paths.map(path => ({
-                        name: path.split('/').pop(),
-                        path: path.trim(),
-                        downloadUrl: path.trim() // 使用相对路径
-                    }));
-                } else {
-                    // 默认示例文件
-                    allFiles = [
-                        { name: 'README.md', path: 'README.md', downloadUrl: 'README.md' },
-                        { name: 'example.md', path: 'example.md', downloadUrl: 'example.md' }
-                    ];
+            // 生成目录 (TOC)
+            function generateTOC() {
+                const headers = preview.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                tocList.innerHTML = '';
+                if (headers.length === 0) {
+                    tocList.innerHTML = '<li style="color: #999; font-style: italic; font-size: 0.9rem;">暂无标题</li>';
+                    return;
                 }
-                
-                renderFileList(allFiles, fileSearch.value);
+                headers.forEach((header, idx) => {
+                    if (!header.id) {
+                        header.id = `heading-${idx}-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+                    }
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = `#${header.id}`;
+                    a.textContent = header.textContent;
+                    const tag = header.tagName.toLowerCase();
+                    a.className = `level-${tag}`;
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        updateActiveTOC(header.id);
+                        // 移动端点击目录后自动关闭侧边栏
+                        if (window.innerWidth <= 768) {
+                            closeSidebar();
+                        }
+                    });
+                    li.appendChild(a);
+                    tocList.appendChild(li);
+                });
+                if (headers.length) setTimeout(() => updateActiveTOC(headers[0].id), 80);
             }
             
-            // 上传本地文件
-            function handleLocalFile(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                currentFileName.textContent = file.name;
-                
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    editor.value = ev.target.result;
-                    renderMarkdown();
-                    mainWrapper.classList.add('read-only-mode');
-                    toggleEditBtn.style.display = 'inline-block';
-                    toggleEditBtn.textContent = '✏️ 编辑模式';
-                };
-                reader.readAsText(file, 'UTF-8');
-                fileInput.value = '';
+            function updateActiveTOC(id) {
+                tocList.querySelectorAll('a').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href === `#${id}`) {
+                        link.classList.add('active');
+                        link.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
             }
             
-            // 编辑模式切换
-            function toggleEditMode() {
-                if (mainWrapper.classList.contains('read-only-mode')) {
-                    mainWrapper.classList.remove('read-only-mode');
-                    toggleEditBtn.textContent = '👁️ 只读模式';
-                    editor.focus();
-                } else {
-                    mainWrapper.classList.add('read-only-mode');
-                    toggleEditBtn.textContent = '✏️ 编辑模式';
-                }
+            // 监听预览滚动更新高亮
+            function bindPreviewScroll() {
+                preview.addEventListener('scroll', () => {
+                    const headers = preview.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                    let currentId = '';
+                    const offset = 90;
+                    for (let header of headers) {
+                        const rect = header.getBoundingClientRect();
+                        const containerRect = preview.getBoundingClientRect();
+                        const relativeTop = rect.top - containerRect.top;
+                        if (relativeTop >= offset - 60 && relativeTop <= offset + 120) {
+                            currentId = header.id;
+                            break;
+                        }
+                    }
+                    if (currentId) updateActiveTOC(currentId);
+                });
             }
             
-            // 搜索过滤
-            fileSearch.addEventListener('input', (e) => {
-                renderFileList(allFiles, e.target.value);
-            });
-            
-            // 侧边栏控制
+            // 移动端侧边栏控制
             function openSidebar() {
+                if (!sidebar) return;
                 sidebar.classList.add('open');
-                overlay.classList.add('active');
+                if (overlay) overlay.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
             
             function closeSidebar() {
+                if (!sidebar) return;
                 sidebar.classList.remove('open');
-                overlay.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
                 document.body.style.overflow = '';
             }
             
@@ -750,62 +650,90 @@
                 }
             }
             
+            // 监听窗口resize，当宽度>768时强制关闭侧边栏动画并重置样式
             function handleResize() {
                 if (window.innerWidth >= 769) {
-                    sidebar.classList.remove('open');
-                    overlay.classList.remove('active');
+                    if (sidebar) sidebar.classList.remove('open');
+                    if (overlay) overlay.classList.remove('active');
                     document.body.style.overflow = '';
                 }
             }
             
+            // 只读模式切换
+            function toggleEditMode() {
+                if (mainWrapper.classList.contains('read-only-mode')) {
+                    mainWrapper.classList.remove('read-only-mode');
+                    toggleEditBtn.textContent = '👁️ 只读模式';
+                    editor.focus();
+                } else {
+                    mainWrapper.classList.add('read-only-mode');
+                    toggleEditBtn.textContent = '✏️ 编辑模式';
+                }
+            }
+            
+            // 导入文件
+            function handleFileImport(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // 显示文件名（截断长文件名）
+                let displayName = file.name;
+                if (displayName.length > 28) {
+                    displayName = displayName.slice(0, 25) + '...';
+                }
+                fileNameDisplay.textContent = displayName;
+                
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    editor.value = ev.target.result;
+                    mainWrapper.classList.add('read-only-mode');
+                    toggleEditBtn.style.display = 'inline-block';
+                    toggleEditBtn.textContent = '✏️ 编辑模式';
+                    renderMarkdown();
+                };
+                reader.readAsText(file, 'UTF-8');
+                fileInput.value = '';
+            }
+            
+            // 预览区域内的锚点链接处理
+            function handlePreviewLinks() {
+                preview.addEventListener('click', (e) => {
+                    const target = e.target.closest('a');
+                    if (target && target.hash && target.hash.startsWith('#')) {
+                        const id = target.hash.substring(1);
+                        const elem = document.getElementById(id);
+                        if (elem) {
+                            e.preventDefault();
+                            elem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            updateActiveTOC(id);
+                        }
+                    }
+                });
+            }
+            
+            // 监听编辑器输入
+            function initEventBindings() {
+                editor.addEventListener('input', renderMarkdown);
+                if (fileInput) fileInput.addEventListener('change', handleFileImport);
+                if (toggleEditBtn) toggleEditBtn.addEventListener('click', toggleEditMode);
+                if (menuToggleBtn) menuToggleBtn.addEventListener('click', toggleSidebar);
+                if (overlay) overlay.addEventListener('click', closeSidebar);
+                window.addEventListener('resize', handleResize);
+                bindPreviewScroll();
+                handlePreviewLinks();
+            }
+            
             // 初始化
-            editor.addEventListener('input', renderMarkdown);
-            refreshBtn.addEventListener('click', refreshFileList);
-            fileInput.addEventListener('change', handleLocalFile);
-            toggleEditBtn.addEventListener('click', toggleEditMode);
-            menuToggleBtn.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', closeSidebar);
-            window.addEventListener('resize', handleResize);
+            function init() {
+                editor.value = defaultContent;
+                initEventBindings();
+                renderMarkdown();
+                toggleEditBtn.style.display = 'none';
+                mainWrapper.classList.remove('read-only-mode');
+                handleResize();
+            }
             
-            // 设置默认内容
-            editor.value = `# 欢迎使用 GitHub Markdown 阅读器
-
-## 📖 使用说明
-
-1. 点击 **刷新列表** 按钮，输入您的 Markdown 文件路径
-2. 或者直接 **上传本地** Markdown 文件
-3. 点击左侧文件卡片即可阅读内容
-
-## 📁 文件路径格式
-
-如果您在仓库中有以下文件结构：
-\`\`\`
-.
-├── README.md
-├── docs/
-│   └── guide.md
-└── posts/
-    └── hello.md
-\`\`\`
-
-请输入：
-\`\`\`
-README.md
-docs/guide.md
-posts/hello.md
-\`\`\`
-
-## ✨ 特性
-
-- 自动扫描 GitHub 仓库文件
-- 支持文件夹分组显示
-- 文件搜索功能
-- 本地文件上传
-- 移动端适配
-`;
-            
-            renderMarkdown();
-            refreshFileList();
+            init();
         })();
     </script>
 </body>
